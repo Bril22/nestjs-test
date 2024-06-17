@@ -1,0 +1,15 @@
+# version: '3.8'
+services:
+  test-db:
+    image: postgres:13
+    ports:
+      - 5436:5432
+    environment:
+      POSTGRES_USER: postgresql123
+      POSTGRES_PASSWORD: briltest
+      POSTGRES_DB: nest
+    networks:
+      - briltest
+
+networks:
+  briltest:
