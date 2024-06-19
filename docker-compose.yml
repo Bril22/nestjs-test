@@ -14,11 +14,11 @@ services:
   dev-db:
     image: postgres:13
     ports:
-      - 5438:5432
+      - 5437:5432
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: db
+      POSTGRES_USER: postgresql123
+      POSTGRES_PASSWORD: brildev
+      POSTGRES_DB: dev-db
     networks:
       - briltest
 

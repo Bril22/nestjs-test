@@ -30,7 +30,8 @@ model User {
   firstName String?
   lastName  String?
 
-  bookmarks Bookmark[]
+  bookmarks    Bookmark[]
+  Subscription Subscription[]
 
   @@map("users")
 }
@@ -48,4 +49,30 @@ model Bookmark {
   user   User @relation(fields: [userId], references: [id])
 
   @@map("bookmarks")
+}
+
+model Subscription {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime
+  status        String
+  paymentStatus String
+  author        User     @relation(fields: [userId], references: [id])
+  userId        Int
+  Channel       Channel? @relation(fields: [channelId], references: [id])
+  channelId     Int?
+
+  @@map("subscriptions")
+}
+
+model Channel {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  category    String
+  isActive    Boolean @default(true)
+
+  subscriptions Subscription[]
+
+  @@map("channels")
 }
