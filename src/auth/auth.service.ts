@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthDto, tokenDto } from './dto';
+import { AuthDto, AuthResponse, tokenDto } from './dto';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
@@ -18,7 +18,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signup(dto: AuthDto): Promise<object> {
+  async signup(dto: AuthDto): Promise<AuthResponse> {
     const hash = await argon.hash(dto.password);
     try {
       const user = await this.prisma.user.create({
@@ -34,9 +34,9 @@ export class AuthService {
         email: user.email,
       };
 
-      const token = await this.signToken(tokenData);
+      const access_token = await this.signToken(tokenData);
       return {
-        token,
+        access_token: access_token,
         message: 'Signup Successful',
       };
     } catch (err) {
@@ -49,7 +49,7 @@ export class AuthService {
     }
   }
 
-  async signin(dto: AuthDto): Promise<object> {
+  async signin(dto: AuthDto): Promise<AuthResponse> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -71,10 +71,12 @@ export class AuthService {
 
     const access_token = await this.signToken(tokenData);
     return {
-      access_token,
+      access_token: access_token,
       message: 'Login Successful',
     };
   }
+
+  async signout() {}
 
   async signToken(dto: tokenDto): Promise<string> {
     const payload = {

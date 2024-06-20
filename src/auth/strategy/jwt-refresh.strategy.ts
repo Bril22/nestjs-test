@@ -3,36 +3,25 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { tokenDto } from '../dto';
-import { User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Request } from 'express';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtRefreshStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
   constructor(
     config: ConfigService,
     private prisma: PrismaService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([
-        JwtStrategy.extractJWTFromCookie,
-      ]),
-
-      // use cookies
-      // jwtfromRequest: ExtractJwt.fromExtractors([(req) => req.cookies.token]),
-      secretOrKey: config.get<string>('JWT_SECRET'),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: config.get<string>('JWT_REFRESH_SECRET'),
       ignoreExpiration: false,
     });
   }
 
-  private static extractJWTFromCookie(req: Request): string | null {
-    if (req.cookies && req.cookies.access_token) {
-      return req.cookies.access_token;
-    }
-    return null;
-  }
-
-  async validate(payload: tokenDto): Promise<User | null> {
+  async validate(payload: tokenDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         id: payload.userId,
@@ -42,6 +31,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new UnauthorizedException();
     }
-    return user;
+    return {
+      attributes: user,
+      refreshTokenExpiresAt: new Date(payload.exp * 1000),
+    };
   }
 }
