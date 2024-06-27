@@ -17,5 +17,8 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-  }
+    "typeRoots": ["./typings", "./node_modules/@types"]
+  },
+  "include": ["src", "typings.d.ts"],
+  "exclude": ["node_modules"]
 }

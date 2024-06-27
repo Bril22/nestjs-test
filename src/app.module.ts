@@ -2,9 +2,10 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from 'nestjs-prisma';
-import { TokenValidationMiddleware } from './middleware';
+import { CsrfMiddleware, TokenValidationMiddleware } from './middleware';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -15,15 +16,25 @@ import { TokenValidationMiddleware } from './middleware';
     BookmarkModule,
     AuthModule,
     PrismaModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+      }),
+      inject: [ConfigService],
+    }),
   ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TokenValidationMiddleware)
-      .forRoutes(
-        { path: 'users', method: RequestMethod.ALL },
-        { path: 'auth/protected', method: RequestMethod.ALL },
-      );
+    consumer.apply(TokenValidationMiddleware).forRoutes(
+      { path: 'users', method: RequestMethod.ALL },
+      { path: 'auth/protected', method: RequestMethod.ALL },
+      { path: 'users/user', method: RequestMethod.ALL },
+      // { path: '*', method: RequestMethod.ALL },
+    );
+    // consumer
+    //   .apply(CsrfMiddleware)
+    //   .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

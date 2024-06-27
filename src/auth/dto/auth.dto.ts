@@ -32,6 +32,7 @@ export class tokenDto {
 }
 
 export class AuthResponse {
+  userId: number;
   access_token: string;
   message: string;
 }

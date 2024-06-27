@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EditUserDto } from './dto/edit-user.dto';
 import { UserEntity } from './entity';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuthResponse } from 'src/auth/dto';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
@@ -25,5 +26,14 @@ export class UserService {
     const user = await this.prisma.user.findMany();
     return user.map((user) => new UserEntity(user));
     // return this.prisma.user.findMany()
+  }
+
+  async deleteUser(userId: number) {
+    const user = await this.prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+    return user;
   }
 }

@@ -1,15 +1,19 @@
 import { NestFactory } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import fastifyCsrf from '@fastify/csrf-protection';
+import secureSession from '@fastify/secure-session';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import cookieParser from 'cookie-parser';
+import { fastifyCookie } from '@fastify/cookie';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { CsrfMiddleware } from './middleware';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-    }),
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
   );
 
   const config = new DocumentBuilder()
@@ -22,7 +26,32 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  app.use(cookieParser());
+  app.register(fastifyCookie, {
+    secret: 'my-secret',
+  });
+
+  app.register(secureSession, {
+    secret: 'averylogphrasebiggerthanthirtytwochars',
+    salt: 'mq9hDxBVDbspDR6n',
+    cookie: {
+      path: '/',
+      httpOnly: true,
+      secure: false,
+      maxAge: 86400,
+    },
+  });
+
+  app.register(fastifyCsrf, {
+    sessionPlugin: '@fastify/secure-session',
+    cookieKey: '_csrf',
+    cookieOpts: {
+      path: '/',
+      httpOnly: true,
+      secure: false,
+    },
+  });
+
+  // app.use(new CsrfMiddleware().use);
 
   await app.listen(3333);
 }

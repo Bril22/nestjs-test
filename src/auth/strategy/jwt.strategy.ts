@@ -14,25 +14,26 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private prisma: PrismaService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([
-        JwtStrategy.extractJWTFromCookie,
-      ]),
+      // jwtFromRequest: ExtractJwt.fromExtractors([
+      //   JwtStrategy.extractJWTFromCookie,
+      // ]),
 
       // use cookies
       // jwtfromRequest: ExtractJwt.fromExtractors([(req) => req.cookies.token]),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: config.get<string>('JWT_SECRET'),
       ignoreExpiration: false,
     });
   }
 
-  private static extractJWTFromCookie(req: Request): string | null {
-    if (req.cookies && req.cookies.access_token) {
-      return req.cookies.access_token;
-    }
-    return null;
-  }
+  // private static extractJWTFromCookie(req: Request): string | null {
+  //   if (req.cookies && req.cookies.access_token) {
+  //     return req.cookies.access_token;
+  //   }
+  //   return null;
+  // }
 
-  async validate(payload: tokenDto): Promise<User | null> {
+  async validate(payload: tokenDto, req: Request): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: {
         id: payload.userId,
@@ -40,8 +41,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       },
     });
     if (!user) {
+      console.log('User not found');
       throw new UnauthorizedException();
     }
+    req.user = user;
     return user;
   }
 }

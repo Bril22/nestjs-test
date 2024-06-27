@@ -30,7 +30,6 @@ export class BookmarkService {
         ...dto,
       },
     });
-
     return bookmark;
   }
 

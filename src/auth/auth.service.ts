@@ -36,7 +36,7 @@ export class AuthService {
 
       const access_token = await this.signToken(tokenData);
       return {
-        access_token: access_token,
+        access_token,
         message: 'Signup Successful',
       };
     } catch (err) {
@@ -71,7 +71,7 @@ export class AuthService {
 
     const access_token = await this.signToken(tokenData);
     return {
-      access_token: access_token,
+      access_token,
       message: 'Login Successful',
     };
   }

@@ -7,5 +7,8 @@ export const GetUser = createParamDecorator(
       return request.user[data];
     }
     return request.user;
+    // const user = request.user[data];
+
+    // return data ? user?.[data] : user;
   },
 );
