@@ -1,24 +1,27 @@
-FROM node:16 AS builder
+FROM public.ecr.aws/docker/library/node:16
 
-# Create app directory
-WORKDIR /app
-
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Install app dependencies
-RUN npm install
+WORKDIR /api-server
 
 COPY . .
 
+RUN npm ci
 RUN npm run build
+RUN npx prisma generate
 
-FROM node:16
+ENV SERVER_PORT=80
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
+ENV DATABASE_URL="postgresql://postgresql123:briltest@localhost:5436/nest?schema=public"
+ENV DEBUG=true
+ENV SESSION_SECRET_KEY="98fQTDh2uNSRVjrRxFn5V4WgPP99QawUkLHqoDdBFHBXQi3Z"
+ENV JWT_SECRET="jwt-secret"
+ENV JWT_REFRESH_SECRET="jwt-refresh-secret"
+ENV COOKIE_SECRET="secret-cookie"
+# Encryption key needs to be 32 chars long
+ENV ENCRYPTION_KEY="ZydMYrVB9JPFGM3NMhcjeX9eciSoStw3"
 
-EXPOSE 3000
-CMD [ "npm", "run", "start:prod" ]
+EXPOSE 80
+
+RUN chmod +x /api-server/startProduction.sh
+RUN chown root:root startProduction.sh
+
+CMD /api-server/startProduction.sh
