@@ -5,10 +5,10 @@ WORKDIR /api-server
 COPY . .
 
 
-RUN npm ci
-RUN npx prisma generate
-RUN npx prisma db push
+RUN npm install
 RUN npm run build
+RUN npx prisma generate
+# RUN npx prisma db push
 CMD ["npm", "start"]
 ENV SERVER_PORT=80
 
