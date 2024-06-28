@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from 'nestjs-prisma';
 import { CsrfMiddleware, TokenValidationMiddleware } from './middleware';
 import { JwtModule } from '@nestjs/jwt';
+import { BooksModule } from './books/books.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
       inject: [ConfigService],
     }),
+    BooksModule,
   ],
 })
 export class AppModule {
