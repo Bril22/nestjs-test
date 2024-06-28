@@ -6,7 +6,7 @@ COPY . .
 
 RUN npm ci
 RUN npx prisma generate
-RUN npx prisma push
+RUN npx prisma db push
 RUN npm run build
 CMD ["npm", "start"]
 ENV SERVER_PORT=80
