@@ -52,7 +52,6 @@ async function bootstrap() {
   });
 
   // app.use(new CsrfMiddleware().use);
-  // test
 
   await app.listen(3333);
 }
