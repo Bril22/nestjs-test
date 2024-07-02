@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:16
+FROM --platform=linux/arm64 node:18-bullseye
 
 WORKDIR /api-server
 
